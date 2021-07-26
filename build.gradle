@@ -12,16 +12,23 @@ repositories {
 
 dependencies {
     implementation 'com.sparkjava:spark-core:2.9.3'
-    implementation 'rs.ltt.jmap:jmap-gson:0.7.1'
+    implementation 'rs.ltt.jmap:jmap-gson:0.7.2'
+
+    //logging (api)
+    implementation 'org.slf4j:slf4j-api:1.7.32'
+
+    //logging (simple stdout)
+    implementation 'org.slf4j:slf4j-simple:1.7.32'
+
+    implementation 'com.google.firebase:firebase-admin:8.0.0'
+
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
 
 jar {
-    manifest {
-        attributes "Main-Class": "rs.ltt.push.PushServer"
-    }
+    manifest.attributes("Main-Class": "rs.ltt.push.PushServer")
 }
 
 test {
