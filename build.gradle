@@ -11,6 +11,10 @@ repositories {
 }
 
 dependencies {
+
+    //command line parser
+    implementation 'commons-cli:commons-cli:1.4'
+
     implementation 'com.sparkjava:spark-core:2.9.3'
     implementation 'rs.ltt.jmap:jmap-gson:0.7.2'
 

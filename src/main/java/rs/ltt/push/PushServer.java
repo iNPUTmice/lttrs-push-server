@@ -1,10 +1,16 @@
 package rs.ltt.push;
 
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.base.Strings;
 import com.google.common.primitives.Longs;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rs.ltt.jmap.common.entity.PushMessage;
@@ -14,6 +20,8 @@ import spark.ExceptionHandler;
 import spark.Route;
 import spark.Spark;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
 
 public class PushServer {
@@ -87,11 +95,36 @@ public class PushServer {
     }
 
     public static void main(final String... args) {
-        start("0.0.0.0", 1234);
+        try {
+            final DefaultParser defaultParser = new DefaultParser();
+            final CommandLine commandLine = defaultParser.parse(new PushServerOptions(), args);
+            final String ip = commandLine.getOptionValue("listen");
+            final String port = commandLine.getOptionValue("port");
+            final String serviceAccount = commandLine.getOptionValue("service-account");
+            if (Strings.isNullOrEmpty(ip) || Strings.isNullOrEmpty(port) || Strings.isNullOrEmpty(serviceAccount)) {
+                throw new IllegalArgumentException("Missing parameter");
+            }
+            final File serviceAccountFile = new File(serviceAccount);
+            start(ip, Integer.parseInt(port), serviceAccountFile);
+        } catch (final Exception e) {
+            System.err.println(e.getMessage());
+            System.err.print("\n");
+            final HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("java -jar lttrs-push-server-0.1-all.jar", new PushServerOptions());
+        }
     }
 
-    public static void start(final String host, final int port) {
-        Spark.ipAddress(host);
+    public static void start(final String ip, final int port, final File file) {
+        try {
+            final FileInputStream serviceAccount = new FileInputStream(file);
+            final FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .build();
+            FirebaseApp.initializeApp(options);
+        } catch (Exception e) {
+            LOGGER.info("Unable to initialize Firebase");
+        }
+        Spark.ipAddress(ip);
         Spark.port(port);
         Spark.exception(RuntimeException.class, PushServer.exception);
         Spark.post("/execute", PushServer.execute);

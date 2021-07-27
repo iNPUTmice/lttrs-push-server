@@ -18,11 +18,13 @@ public class Messages {
     private static final String DATA_KEY_TYPE = "type";
     private static final String DATA_KEY_CID = "cid";
     private static final String DATA_KEY_ACCOUNT = "account";
+    private static final String DATA_KEY_VERIFICATION_CODE = "verificationCode";
+    private static final String DATA_KEY_SUBSCRIPTION_ID = "subscriptionId";
 
     public static List<Message> of(final String token, final long cid, final StateChange stateChange) {
         final ImmutableList.Builder<Message> listBuilder = new ImmutableList.Builder<>();
         final Map<String, Map<Class<? extends AbstractIdentifiableEntity>, String>> changed = stateChange.getChanged();
-        for (Map.Entry<String, Map<Class<? extends AbstractIdentifiableEntity>, String>> accountChange : changed.entrySet()) {
+        for (final var accountChange : changed.entrySet()) {
             final String account = accountChange.getKey();
             final Map<Class<? extends AbstractIdentifiableEntity>, String> states = accountChange.getValue();
             final Message.Builder messageBuilder = Message.builder()
@@ -30,7 +32,7 @@ public class Messages {
                     .putData(DATA_KEY_TYPE, getType(stateChange))
                     .putData(DATA_KEY_CID, String.valueOf(cid))
                     .putData(DATA_KEY_ACCOUNT, account);
-            for (Map.Entry<Class<? extends AbstractIdentifiableEntity>, String> state : states.entrySet()) {
+            for (final var state : states.entrySet()) {
                 final String entity = Mapper.ENTITIES.inverse().get(state.getKey());
                 if (entity != null) {
                     messageBuilder.putData(entity, state.getValue());
@@ -56,8 +58,8 @@ public class Messages {
                 .setToken(token)
                 .putData(DATA_KEY_TYPE, getType(verification))
                 .putData(DATA_KEY_CID, String.valueOf(cid))
-                .putData("verificationCode", verification.getVerificationCode())
-                .putData("subscriptionId", verification.getPushSubscriptionId())
+                .putData(DATA_KEY_VERIFICATION_CODE, verification.getVerificationCode())
+                .putData(DATA_KEY_SUBSCRIPTION_ID, verification.getPushSubscriptionId())
                 .build();
     }
 
