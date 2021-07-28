@@ -127,6 +127,10 @@ public class PushServer {
         Spark.ipAddress(ip);
         Spark.port(port);
         Spark.exception(RuntimeException.class, PushServer.exception);
+        Spark.get("/", (request, response) -> {
+            response.redirect("https://github.com/inputmice/lttrs-push-server");
+            return null;
+        });
         Spark.post("/execute", PushServer.execute);
     }
 
